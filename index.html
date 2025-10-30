@@ -33,6 +33,161 @@
             margin: 5px 0;
             font-size: 14px;
         }
+        .control-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            min-width: 220px;
+            transition: all 0.3s ease;
+        }
+        .control-panel:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .control-panel h4 {
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #4285f4;
+            padding-bottom: 8px;
+        }
+        .map-style-selector {
+            margin-bottom: 15px;
+        }
+        .map-style-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #fafafa;
+            transition: all 0.2s ease;
+        }
+        .map-style-selector select:hover {
+            border-color: #4285f4;
+            background-color: white;
+        }
+        .map-style-selector select:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+        .control-panel label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #555;
+        }
+        .control-panel input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 250px;
+            transition: all 0.3s ease;
+        }
+        .legend:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .legend h4 {
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #4285f4;
+            padding-bottom: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #555;
+            transition: all 0.2s ease;
+        }
+        .legend-item:hover {
+            transform: translateX(3px);
+            color: #333;
+        }
+        .legend-line {
+            width: 35px;
+            height: 4px;
+            margin-right: 12px;
+            border-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .legend-symbol {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .rail-main { background-color: #000000; }
+        .rail-secondary { background-color: #87491D; }
+        .rail-tram { background-color: #C02E2E; }
+        .rail-subway { background-color: #0066CC; }
+        .rail-light-rail { background-color: #00AA00; }
+        .station-symbol {
+            border: 3px solid #000;
+            border-radius: 50%;
+            background: white;
+            font-size: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .toggle-legend {
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s ease;
+        }
+        .toggle-legend:hover {
+            color: #4285f4;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .info-box {
+                max-width: 250px;
+                padding: 10px;
+            }
+            .info-box h3 {
+                font-size: 14px;
+            }
+            .info-box p {
+                font-size: 12px;
+            }
+            .control-panel {
+                min-width: 180px;
+                padding: 12px;
+            }
+            .legend {
+                max-width: 200px;
+                padding: 12px;
+            }
+            .legend-item {
+                font-size: 11px;
+                margin: 8px 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -41,11 +196,60 @@
         <p>此地圖結合了 Google Maps 與 OpenRailway 鐵路路網資料</p>
         <p>Railway data from OpenStreetMap</p>
     </div>
+
+    <div class="control-panel">
+        <h4>地圖樣式</h4>
+        <div class="map-style-selector">
+            <select id="mapStyleSelect">
+                <option value="roadmap">道路地圖</option>
+                <option value="satellite">衛星影像</option>
+                <option value="hybrid">混合地圖</option>
+                <option value="terrain">地形圖</option>
+            </select>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="railwayToggle" checked>
+                顯示鐵路圖層
+            </label>
+        </div>
+    </div>
+
+    <div class="legend">
+        <h4 class="toggle-legend">圖例 ▼</h4>
+        <div id="legendContent">
+            <div class="legend-item">
+                <div class="legend-line rail-main"></div>
+                <span>主要鐵路</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line rail-secondary"></div>
+                <span>支線鐵路</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line rail-subway"></div>
+                <span>地鐵/捷運</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line rail-light-rail"></div>
+                <span>輕軌</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line rail-tram"></div>
+                <span>有軌電車</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-symbol station-symbol">●</div>
+                <span>車站</span>
+            </div>
+        </div>
+    </div>
+
     <div id="map"></div>
 
     <script>
         let map;
-        let railwayOverlay;
+        let railwayTileLayer;
 
         function initMap() {
             // 初始化地圖，中心點設在台灣
@@ -55,40 +259,9 @@
                 mapTypeId: 'roadmap'
             });
 
-            // 定義 OpenRailway 圖層
-            class RailwayOverlay extends google.maps.OverlayView {
-                constructor() {
-                    super();
-                    this.div_ = null;
-                }
-
-                onAdd() {
-                    const div = document.createElement('div');
-                    div.style.position = 'absolute';
-                    div.style.width = '100%';
-                    div.style.height = '100%';
-                    this.div_ = div;
-
-                    const panes = this.getPanes();
-                    panes.overlayLayer.appendChild(div);
-                }
-
-                draw() {
-                    // 這個方法在地圖移動或縮放時會被調用
-                    // 因為我們使用圖磚層，所以這裡不需要特別處理
-                }
-
-                onRemove() {
-                    if (this.div_) {
-                        this.div_.parentNode.removeChild(this.div_);
-                        this.div_ = null;
-                    }
-                }
-            }
-
             // 使用 OpenStreetMap 的鐵路圖磚層
             // OpenRailwayMap 提供專門的鐵路路網圖磚
-            const railwayTileLayer = new google.maps.ImageMapType({
+            railwayTileLayer = new google.maps.ImageMapType({
                 getTileUrl: function(coord, zoom) {
                     // OpenRailwayMap 標準圖磚 URL
                     return `https://tiles.openrailwaymap.org/standard/${zoom}/${coord.x}/${coord.y}.png`;
@@ -103,30 +276,37 @@
             // 將鐵路圖層疊加到地圖上
             map.overlayMapTypes.push(railwayTileLayer);
 
-            // 添加圖層控制按鈕
-            const layerControlDiv = document.createElement('div');
-            layerControlDiv.style.margin = '10px';
-            layerControlDiv.style.padding = '10px';
-            layerControlDiv.style.background = 'white';
-            layerControlDiv.style.borderRadius = '3px';
-            layerControlDiv.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
-            layerControlDiv.style.cursor = 'pointer';
-            layerControlDiv.style.textAlign = 'center';
-            layerControlDiv.innerHTML = '<div style="font-size: 14px;">切換鐵路圖層</div>';
-            
-            let railwayVisible = true;
-            layerControlDiv.addEventListener('click', function() {
-                if (railwayVisible) {
-                    railwayTileLayer.setOpacity(0);
-                    layerControlDiv.innerHTML = '<div style="font-size: 14px; color: #999;">鐵路圖層已隱藏</div>';
-                } else {
-                    railwayTileLayer.setOpacity(0.7);
-                    layerControlDiv.innerHTML = '<div style="font-size: 14px;">切換鐵路圖層</div>';
-                }
-                railwayVisible = !railwayVisible;
+            // 地圖樣式選擇器事件監聽
+            const mapStyleSelect = document.getElementById('mapStyleSelect');
+            mapStyleSelect.addEventListener('change', function() {
+                map.setMapTypeId(this.value);
             });
 
-            map.controls[google.maps.ControlPosition.TOP_RIGHT].push(layerControlDiv);
+            // 鐵路圖層切換事件監聽
+            const railwayToggle = document.getElementById('railwayToggle');
+            railwayToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    railwayTileLayer.setOpacity(0.7);
+                } else {
+                    railwayTileLayer.setOpacity(0);
+                }
+            });
+
+            // 圖例折疊功能
+            const legendToggle = document.querySelector('.toggle-legend');
+            const legendContent = document.getElementById('legendContent');
+            let legendExpanded = true;
+
+            legendToggle.addEventListener('click', function() {
+                legendExpanded = !legendExpanded;
+                if (legendExpanded) {
+                    legendContent.style.display = 'block';
+                    legendToggle.textContent = '圖例 ▼';
+                } else {
+                    legendContent.style.display = 'none';
+                    legendToggle.textContent = '圖例 ▶';
+                }
+            });
         }
 
         window.initMap = initMap;
