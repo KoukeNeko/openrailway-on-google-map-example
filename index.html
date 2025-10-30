@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenRailway on Google Map</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        .info-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info-box">
+        <h3>OpenRailway on Google Map</h3>
+        <p>此地圖結合了 Google Maps 與 OpenRailway 鐵路路網資料</p>
+        <p>Railway data from OpenStreetMap</p>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        let map;
+        let railwayOverlay;
+
+        function initMap() {
+            // 初始化地圖，中心點設在台灣
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 23.973875, lng: 120.982024 }, // 台灣中心
+                zoom: 8,
+                mapTypeId: 'roadmap'
+            });
+
+            // 定義 OpenRailway 圖層
+            class RailwayOverlay extends google.maps.OverlayView {
+                constructor() {
+                    super();
+                    this.div_ = null;
+                }
+
+                onAdd() {
+                    const div = document.createElement('div');
+                    div.style.position = 'absolute';
+                    div.style.width = '100%';
+                    div.style.height = '100%';
+                    this.div_ = div;
+
+                    const panes = this.getPanes();
+                    panes.overlayLayer.appendChild(div);
+                }
+
+                draw() {
+                    // 這個方法在地圖移動或縮放時會被調用
+                    // 因為我們使用圖磚層，所以這裡不需要特別處理
+                }
+
+                onRemove() {
+                    if (this.div_) {
+                        this.div_.parentNode.removeChild(this.div_);
+                        this.div_ = null;
+                    }
+                }
+            }
+
+            // 使用 OpenStreetMap 的鐵路圖磚層
+            // OpenRailwayMap 提供專門的鐵路路網圖磚
+            const railwayTileLayer = new google.maps.ImageMapType({
+                getTileUrl: function(coord, zoom) {
+                    // OpenRailwayMap 標準圖磚 URL
+                    return `https://tiles.openrailwaymap.org/standard/${zoom}/${coord.x}/${coord.y}.png`;
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: 'Railway',
+                maxZoom: 18,
+                minZoom: 2,
+                opacity: 0.7
+            });
+
+            // 將鐵路圖層疊加到地圖上
+            map.overlayMapTypes.push(railwayTileLayer);
+
+            // 添加圖層控制按鈕
+            const layerControlDiv = document.createElement('div');
+            layerControlDiv.style.margin = '10px';
+            layerControlDiv.style.padding = '10px';
+            layerControlDiv.style.background = 'white';
+            layerControlDiv.style.borderRadius = '3px';
+            layerControlDiv.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+            layerControlDiv.style.cursor = 'pointer';
+            layerControlDiv.style.textAlign = 'center';
+            layerControlDiv.innerHTML = '<div style="font-size: 14px;">切換鐵路圖層</div>';
+            
+            let railwayVisible = true;
+            layerControlDiv.addEventListener('click', function() {
+                if (railwayVisible) {
+                    railwayTileLayer.setOpacity(0);
+                    layerControlDiv.innerHTML = '<div style="font-size: 14px; color: #999;">鐵路圖層已隱藏</div>';
+                } else {
+                    railwayTileLayer.setOpacity(0.7);
+                    layerControlDiv.innerHTML = '<div style="font-size: 14px;">切換鐵路圖層</div>';
+                }
+                railwayVisible = !railwayVisible;
+            });
+
+            map.controls[google.maps.ControlPosition.TOP_RIGHT].push(layerControlDiv);
+        }
+
+        window.initMap = initMap;
+    </script>
+    
+    <!-- 載入 Google Maps API -->
+    <!-- 注意：實際使用時需要替換 YOUR_API_KEY 為有效的 Google Maps API 金鑰 -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap&v=weekly" async defer></script>
+</body>
+</html>

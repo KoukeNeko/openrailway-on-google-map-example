@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenRailway Demo (Leaflet)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        .info-box {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 350px;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info-box">
+        <h3>OpenRailway Demo (使用 Leaflet)</h3>
+        <p>此為測試版本，使用 OpenStreetMap 作為底圖</p>
+        <p>Railway overlay from OpenRailwayMap</p>
+        <p><small>此版本不需要 Google Maps API Key</small></p>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 初始化地圖，中心點設在台灣
+        const map = L.map('map').setView([23.973875, 120.982024], 8);
+
+        // 添加 OpenStreetMap 底圖
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // 添加 OpenRailwayMap 鐵路圖層
+        const railwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+            attribution: 'Railway data: &copy; <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a> contributors',
+            maxZoom: 18,
+            opacity: 0.7,
+            subdomains: 'abc'
+        }).addTo(map);
+
+        // 添加圖層控制
+        const baseLayers = {
+            "OpenStreetMap": osmLayer
+        };
+
+        const overlays = {
+            "鐵路路網": railwayLayer
+        };
+
+        L.control.layers(baseLayers, overlays).addTo(map);
+
+        // 添加比例尺
+        L.control.scale({
+            imperial: false,
+            metric: true
+        }).addTo(map);
+    </script>
+</body>
+</html>
